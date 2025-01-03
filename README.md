@@ -24,9 +24,9 @@ At its core, diffusion modeling involves generating samples from a data distribu
 
 In the forward process, noise is incrementally added to a data sample \(x_0\), creating a sequence of increasingly noisy samples \(x_t\):
 
-\[
+$$
 q(x_t | x_0) = \mathcal{N}(x_t; \sqrt{\alpha_t} x_0, (1 - \alpha_t) \mathbf{I}),
-\]
+$$
 
 where \(\alpha_t\) controls the noise schedule.
 
@@ -34,17 +34,17 @@ where \(\alpha_t\) controls the noise schedule.
 
 The reverse process removes noise step by step to recover \(x_0\). This is formalized as:
 
-\[
+$$
 dx_t = -\nabla_x \log p(x_t) \, dt + \sqrt{2} \, dw_t,
-\]
+$$
 
 where \(\nabla_x \log p(x_t)\) is the score function, and \(dw_t\) represents Wiener noise.
 
 In practice, the reverse process is parameterized using a neural network \(D_\theta(x_t, t)\), trained to predict either the noise added or the denoised sample at each step:
 
-\[
+$$
 \mathcal{L}(\theta) = \mathbb{E}_{x_0, t, \epsilon} \left[ \| D_\theta(x_t, t) - \epsilon \|^2 \right],
-\]
+$$
 
 where \(\epsilon\) is the added noise.
 
@@ -62,9 +62,9 @@ The paper introduces a novel approach called **Autoguidance**, which disentangle
 2. **Score-Based Guidance:**  
    Guidance is applied by modifying the score function during sampling:
 
-   \[
+   $$
    \nabla_x \log p_w(x|c;\sigma) = \nabla_x \log p_1(x|c;\sigma) + (w - 1) \nabla_x \log \frac{p_1(x|c;\sigma)}{p_0(x|c;\sigma)},
-   \]
+   $$
 
    where \(w\) is the guidance weight, \(p_1\) represents the conditional density from the main model, and \(p_0\) is the guiding model's density. This formula adjusts the sampling trajectory, pulling outputs closer to the desired high-probability regions.
 
