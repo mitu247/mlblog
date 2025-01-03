@@ -18,35 +18,35 @@ The widely-used **Classifier-Free Guidance (CFG)** technique improves image qual
 
 ## What is Diffusion?
 
-At its core, diffusion modeling involves generating samples from a data distribution \(p_{\text{data}}(x)\) by iteratively reversing a noise corruption process. This is achieved by simulating the solution to a stochastic differential equation (SDE) or its deterministic counterpart, an ordinary differential equation (ODE).
+At its core, diffusion modeling involves generating samples from a data distribution \( p_{\text{data}}(x) \) by iteratively reversing a noise corruption process. This is achieved by simulating the solution to a stochastic differential equation (SDE) or its deterministic counterpart, an ordinary differential equation (ODE).
 
 ### Forward Process
 
-In the forward process, noise is incrementally added to a data sample \(x_0\), creating a sequence of increasingly noisy samples \(x_t\):
+In the forward process, noise is incrementally added to a data sample \( x_0 \), creating a sequence of increasingly noisy samples \( x_t \):
 
 $$
 q(x_t | x_0) = \mathcal{N}(x_t; \sqrt{\alpha_t} x_0, (1 - \alpha_t) \mathbf{I}),
 $$
 
-where \(\alpha_t\) controls the noise schedule.
+where \( \alpha_t \) controls the noise schedule.
 
 ### Reverse Process
 
-The reverse process removes noise step by step to recover \(x_0\). This is formalized as:
+The reverse process removes noise step by step to recover \( x_0 \). This is formalized as:
 
 $$
 dx_t = -\nabla_x \log p(x_t) \, dt + \sqrt{2} \, dw_t,
 $$
 
-where \(\nabla_x \log p(x_t)\) is the score function, and \(dw_t\) represents Wiener noise.
+where \( \nabla_x \log p(x_t) \) is the score function, and \( dw_t \) represents Wiener noise.
 
-In practice, the reverse process is parameterized using a neural network \(D_\theta(x_t, t)\), trained to predict either the noise added or the denoised sample at each step:
+In practice, the reverse process is parameterized using a neural network \( D_\theta(x_t, t) \), trained to predict either the noise added or the denoised sample at each step:
 
 $$
 \mathcal{L}(\theta) = \mathbb{E}_{x_0, t, \epsilon} \left[ \| D_\theta(x_t, t) - \epsilon \|^2 \right],
 $$
 
-where \(\epsilon\) is the added noise.
+where \( \epsilon \) is the added noise.
 
 ---
 
@@ -57,7 +57,7 @@ The paper introduces a novel approach called **Autoguidance**, which disentangle
 ### Why Autoguidance Works
 
 1. **Error Amplification:**  
-   The weaker model (guiding model, \(D_0\)) makes similar errors as the main model (\(D_1\)), but to a greater degree. This provides a directional signal to correct the main model's outputs.
+   The weaker model (guiding model, \( D_0 \)) makes similar errors as the main model (\( D_1 \)), but to a greater degree. This provides a directional signal to correct the main model's outputs.
 
 2. **Score-Based Guidance:**  
    Guidance is applied by modifying the score function during sampling:
@@ -66,7 +66,7 @@ The paper introduces a novel approach called **Autoguidance**, which disentangle
    \nabla_x \log p_w(x|c;\sigma) = \nabla_x \log p_1(x|c;\sigma) + (w - 1) \nabla_x \log \frac{p_1(x|c;\sigma)}{p_0(x|c;\sigma)},
    $$
 
-   where \(w\) is the guidance weight, \(p_1\) represents the conditional density from the main model, and \(p_0\) is the guiding model's density. This formula adjusts the sampling trajectory, pulling outputs closer to the desired high-probability regions.
+   where \( w \) is the guidance weight, \( p_1 \) represents the conditional density from the main model, and \( p_0 \) is the guiding model's density. This formula adjusts the sampling trajectory, pulling outputs closer to the desired high-probability regions.
 
 3. **Compatibility of Errors:**  
    The guiding model’s degradations (e.g., reduced capacity or training time) align with the main model's limitations, amplifying their shared deficiencies in low-probability regions.
@@ -111,7 +111,7 @@ Autoguidance is a paradigm shift in generative modeling. By utilizing a "bad ver
 ### Future Research
 
 1. **Formal Proofs:** Establishing theoretical guarantees for when autoguidance outperforms CFG.  
-2. **Optimized Guiding Models:** Exploring architectural or training optimizations to further enhance compatibility between \(D_1\) and \(D_0\).  
+2. **Optimized Guiding Models:** Exploring architectural or training optimizations to further enhance compatibility between \( D_1 \) and \( D_0 \).  
 3. **Cross-Domain Applications:** Extending autoguidance principles to text, video, or 3D generative models.  
 
 ---
