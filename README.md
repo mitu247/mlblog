@@ -82,15 +82,7 @@ Each data sample $x$ is associated with a label $c$. At generation time, we cont
    The weaker guiding model $D_0$ makes the same mistakes as the main model $D_1$ but does so more **strongly**. This acts as a directional signal to correct the output of the main model. Something like a **"bad cop"** guiding a **"good cop"** to make better decisions.
 
 2. **Score-Based Guidance:**
-   Modifying the score function during guidance, the guidance can be done as:
-
-   $
-   \begin{equation}
-   \theta = \arg \min_\theta \mathbb{E}{y \sim p{\text{data}}, \sigma \sim p_{\text{train}}, n \sim N(0, \sigma^2 I)} | D_\theta (y + n; \sigma) - y |_2^2
-   \end{equation}
-   $
-
-   where $w$ is the guidance weight, $p_1$ is the conditional density from the main model, and $p_0$ is the guiding model's density. This formula modifies the sampling trajectory, pulling outputs to be closer to the desired high-probability regions.
+   The score function is adjusted during guidance using a new parameter \( w \), known as the guidance weight. This adjustment influences the sampling process, ensuring that the outputs are more likely to be in the desired high-probability regions.
 
 3. **Compatibility of Errors:**  
    For example, the degradations of the guiding model, such as <u>reduced capacity</u> or <u>training time</u>, align with the limitations of the main model and amplify shared deficiencies in low-probability regions.
