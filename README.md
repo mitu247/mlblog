@@ -45,7 +45,7 @@ where $\nabla_x \log p(x_t)$ is the score function, and $dw_t$ represents Wiener
 
 In practice, the reverse process is parameterized by a neural network $D_\theta(x_t, t)$, which is trained to predict either the noise added or the denoised sample at each step:
 
-$$L(\theta) = E_{x_0,t,\epsilon}[\|\|D_\theta(x_t,t)-\epsilon\|\|^2]$$
+$$\mathcal{L}(\theta) = E_{x_0,t,\epsilon}[\|\|D_\theta(x_t,t)-\epsilon\|\|^2]$$
 
 where $\epsilon$ is the added noise.
 
