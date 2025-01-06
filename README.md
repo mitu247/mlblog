@@ -15,6 +15,9 @@ But, as with all things, there are challenges. One of the biggest challenges in 
 
 Buckle up fellow dreamers, because I am going to take you through a paper that addresses this very challenge. The paper is titled **"Guiding a Diffusion Model with a Bad Version of Itself"** by NVIDIA. Let's dive in!
 
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 
 ## The Problem
 
@@ -89,11 +92,11 @@ Each data sample $x$ is associated with a label $c$. At generation time, we cont
 2. **Score-Based Guidance:**
    Modifying the score function during guidance, the guidance can be done as:
 
-   $$
+   $
    \begin{equation}
-   \nabla_x \log p_w(x|c;\sigma) = \nabla_x \log p_1(x|c;\sigma) + (w-1)\nabla_x \log \frac{p_1(x|c;\sigma)}{p_0(x|c;\sigma)}
+   \theta = \arg \min_\theta \mathbb{E}{y \sim p{\text{data}}, \sigma \sim p_{\text{train}}, n \sim N(0, \sigma^2 I)} | D_\theta (y + n; \sigma) - y |_2^2,
    \end{equation}
-   $$
+   $
 
    where $w$ is the guidance weight, $p_1$ is the conditional density from the main model, and $p_0$ is the guiding model's density. This formula modifies the sampling trajectory, pulling outputs to be closer to the desired high-probability regions.
 
