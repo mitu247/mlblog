@@ -64,11 +64,7 @@ The equation describes a probability flow ODE that evolves a sample from high to
 
 The ODE is solved numerically by stepping along the trajectory defined by Eq. (1), requiring the evaluation of the score function $\nabla_x \log p(x; \sigma)$ for a given sample $x$ and noise level $\sigma$. This can be approximated using a neural network $D_\theta (x; \sigma)$ trained for denoising:
 
-$$
-\begin{equation}
-\theta = \arg \min_\theta \mathbb{E}_{y \sim p_{\text{data}}, \sigma \sim p_{\text{train}}, n \sim N(0, \sigma^2 I)} \| D_\theta (y + n; \sigma) - y \|_2^2,
-\end{equation}
-$$
+$$ \theta = \arg \min_\theta \mathbb{E}{y \sim p{\text{data}}, \sigma \sim p_{\text{train}}, n \sim N(0, \sigma^2 I)} |D_\theta (y + n; \sigma) - y |_2^2 $$
 
 where $p_{\text{train}}$ controls the noise level distribution during training with score function is estimated as:
 
