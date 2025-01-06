@@ -1,66 +1,88 @@
-# Guidance of a Diffusion Model with a Worse Version of Itself
+# Guiding a Diffusion Model with a Bad Version of Itself
 
 **Author:** Sushmita Paul  
 **Date:** 3/01/2025
 
-Among the many interesting papers presented at NeurIPS 2024, one is **"Guiding a Diffusion Model with a Bad Version of Itself"** by NVIDIA. It deals with the intrinsically complex problem of creating generative models that emit high-quality outputs without compromising on variation or alignment with user-specified conditions. This blog goes over the problem, the proposed solution, and the implications for generative modeling.
+So, you know about image generation, right? Well, this is the domain of **Generative Models** which can do magical things like creating images from just from your thoughts. Who wouldn't be happy if they could just imagine a beautiful landscape and see it right in front of their eyes?
 
----
+<p align="center">
+  <img src="AI_Image_Gen.webp" alt="AI Image Generation" width="500" height="300">
+  <br>
+  <em>Figure 1: Dream into Reality</em>
+</p>
+
+But, as with all things, there are challenges. One of the biggest challenges in generative modeling is to create models that can generate high-quality images with a lot of variety.
+
+Buckle up fellow dreamers, because I am going to take you through a paper that addresses this very challenge. The paper is titled **"Guiding a Diffusion Model with a Bad Version of Itself"** by NVIDIA. Let's dive in!
+
 
 ## The Problem
 
-Diffusion models form a powerful class of generative models synthesizing high-quality images by reversing a stochastic corruption process. Commonly, models are forced to make trade-offs along at least three axes of interest:
+Currently, the image generation community faces a dilemma: how to balance image **quality** and **variation**. At present, the most popular technique to guide image generation is **Classifier-Free Guidance (CFG)**. This technique uses an unconditional model to guide a conditional one, thereby enhancing prompt alignment and image quality but comes at the cost of reduced variation.Unfortunately, these entangled effects seriously limit the practical applicability of CFG, especially in applications requiring both variety and fidelity.
 
+<p align="center">
+  <img src="Improvement_Example.png" alt="Improved Image Generation Example" width="500" height="300">
+  <br>
+  <em>Figure 2: Example results for the Tree frog, Palace, Mushroom, Castle</em>
+</p>
+
+So, they focused on developing a new technique called **Autoguidance** which adresses problems regarding-
 1. **Image Quality:** How realistic is the output?  
 2. **Variation:** How diverse are the generated results?  
 3. **Conditioning Alignment:** How well do the outputs adhere to user-specified prompts or labels?  
 
-While the widely used **CFG** improves image quality and prompt alignment, this occurs at the expense of lowered variation. Unfortunately, these entangled effects seriously limit the practical applicability of CFG, especially in applications requiring both variety and fidelity. The authors thus believe that this behavior is rooted in differences in tasks between conditional and unconditional denoising networks.
+Good News!:tada: The researchers at NVIDIA discovered that by guiding the generation model with a smaller and less-trained version of the model itself, high-quality image generation without sacrificing variation is possible (See _Figure 2_). This breakthrough offers disentangled control over image quality and variation, making it a game-changer in image generation.
 
----
+## Some Theoritical References
 
-## Diffusion
+### Diffusion Modeling
 
-Diffusion modeling creates samples from a data distribution $p_{\text{data}}(x)$ by iteratively reversing the noise corruption process. To achieve this, one simulates the solution to a stochastic differential equation (SDE) or its deterministic variant—an ordinary differential equation (ODE).
+It creates samples from a data distribution $p_{\text{data}}(x)$ by iteratively reversing the noise corruption process. To achieve this, one simulates the solution to a stochastic differential equation (SDE) or its deterministic variant—an ordinary differential equation (ODE).
 
-### Forward Process
+### Forward Process (**NOISE-UP**)
 
 In the forward process, one iteratively adds noise to a data sample $x_0$, such that a sequence of increasingly noisy samples $x_t$ are created:
 
 $$
-q(x_t | x_0) = \mathcal{N}(x_t; \sqrt{\alpha_t} x_0, (1 - \alpha_t) \mathbf{I}),
+\begin{equation}
+p(x; \sigma) = p_{\text{data}}(x) * N(x; 0, \sigma^2 I)
+\end{equation}
 $$
 
-where $\alpha_t \in (0, 1)$ controls the noise schedule.
+The equation  describes smoothing a data distribution by convolving it with a Gaussian, which for large $( \sigma )$ approximates white noise, allowing easy sampling from a normal distribution.
 
-### Reverse Process
+### Reverse Process (**NOISE-DOWN**)
 
 The reverse process removes noise step by step to recover $x_0$. This is formalized as:
 
 $$
-dx_t = -\nabla_x \log p(x_t) dt + \sqrt{2} dw_t,
+\begin{equation}
+dx_\sigma = -\sigma \nabla_{x_\sigma} \log p(x_\sigma ; \sigma) d\sigma
+\end{equation}
+$$ 
+
+The equation describes a probability flow ODE that evolves a sample from high to low noise levels, maintaining the distribution $p(x_\sigma ; \sigma)$ and ultimately recovering the original data distribution $p_{\text{data}}(x_0)$ when $( \sigma = 0 )$.
+
+The ODE is solved numerically by stepping along the trajectory defined by Eq. (1), requiring the evaluation of the score function $\nabla_x \log p(x; \sigma)$ for a given sample $x$ and noise level $\sigma$. This can be approximated using a neural network $D_\theta (x; \sigma)$ trained for denoising:
+
+$$
+\theta = \arg \min_\theta \mathbb{E}_{y \sim p_{\text{data}}, \sigma \sim p_{\text{train}}, n \sim N(0, \sigma^2 I)} \| D_\theta (y + n; \sigma) - y \|_2^2,
 $$
 
-where $\nabla_x \log p(x_t)$ is the score function, and $dw_t$ represents Wiener noise.
+where $p_{\text{train}}$ controls the noise level distribution during training with score function is estimated as:
 
-In practice, the reverse process is parameterized by a neural network $D_\theta(x_t, t)$, which is trained to predict either the noise added or the denoised sample at each step:
+$$
+\nabla_x \log p(x; \sigma) \approx \frac{D_\theta (x; \sigma) - x}{\sigma^2}.
+$$
 
-$$\mathcal{L}(\theta) = E_{x_0,t,\epsilon}[\|\|D_\theta(x_t,t)-\epsilon\|\|^2]$$
+Each data sample $x$ is associated with a label $c$. At generation time, we control the outcome by choosing $c$ and seeking a sample from $p(x|c; \sigma)$ with $\sigma = 0$, achieved by training $D_\theta (x; \sigma, c)$ with $c$ as an additional input.
 
-where $\epsilon$ is the added noise.
+## Why Autoguidance Works ??
 
----
+1. **Error Amplification:**
+   The weaker guiding model $D_0$ makes the same mistakes as the main model $D_1$ but does so more **strongly**. This acts as a directional signal to correct the output of the main model. Something like a **"bad cop"** guiding a **"good cop"** to make better decisions.
 
-## Key Contribution: Autoguidance
-
-The paper introduces the approach of **Autoguidance**, which decouples improvement in image quality from variation control. Instead of relying on an unconditional model for guidance, this method uses a weaker version of the main model—a smaller or less-trained variant—as the guiding agent.
-
-### Why Autoguidance Works
-
-1. **Error Amplification:**  
-   The weaker guiding model $D_0$ makes the same mistakes as the main model $D_1$ but does so more strongly. This acts as a directional signal to correct the output of the main model.
-
-2. **Score-Based Guidance:**  
+2. **Score-Based Guidance:**
    Modifying the score function during guidance, the guidance can be done as:
 
    $$\nabla_x \log p_w(x|c;\sigma) = \nabla_x \log p_1(x|c;\sigma) + (w-1)\nabla_x \log \frac{p_1(x|c;\sigma)}{p_0(x|c;\sigma)}$$
@@ -68,9 +90,7 @@ The paper introduces the approach of **Autoguidance**, which decouples improveme
    where $w$ is the guidance weight, $p_1$ is the conditional density from the main model, and $p_0$ is the guiding model's density. This formula modifies the sampling trajectory, pulling outputs to be closer to the desired high-probability regions.
 
 3. **Compatibility of Errors:**  
-   For example, the degradations of the guiding model, such as reduced capacity or training time, align with the limitations of the main model and amplify shared deficiencies in low-probability regions.
-
----
+   For example, the degradations of the guiding model, such as <u>reduced capacity</u> or <u>training time</u>, align with the limitations of the main model and amplify shared deficiencies in low-probability regions.
 
 ## Results and Impact
 
@@ -130,3 +150,8 @@ Autoguidance represents a paradigm shift in generative modeling. The method uses
 This work, "Guiding a Diffusion Model with a Bad Version of Itself," testifies to the ingenuity of researchers tackling core challenges in generative modeling. Autoguidance enables quality and variation control to be decoupled, making generative models more robust and varied. These approaches will undoubtedly form the foundation for future innovations in diffusion modeling.
 
 ---
+
+## References
+
+1. **NVIDIA.** "Guiding a Diffusion Model with a Bad Version of Itself." NeurIPS 2024. [Paper Link](https://openreview.net/forum?id=bg6fVPVs3s)
+2. **AI Image Generation Picture** from [Medium](https://medium.com/@natiberk/the-state-of-ai-image-generation-03-24-e91f6d7ea6cf)
