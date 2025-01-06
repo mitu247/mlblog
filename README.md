@@ -45,7 +45,7 @@ where $\nabla_x \log p(x_t)$ is the score function, and $dw_t$ represents Wiener
 
 In practice, the reverse process is parameterized by a neural network $D_\theta(x_t, t)$, which is trained to predict either the noise added or the denoised sample at each step:
 
-$$L(\theta) = E_{x_0, t, \epsilon} [ \|D_\theta(x_t, t) - \epsilon\|^2 ]$$
+$$L(\theta) = E_{x_0,t,\epsilon}[\|\|D_\theta(x_t,t)-\epsilon\|\|^2]$$
 
 where $\epsilon$ is the added noise.
 
@@ -63,7 +63,7 @@ The paper introduces the approach of **Autoguidance**, which decouples improveme
 2. **Score-Based Guidance:**  
    Modifying the score function during guidance, the guidance can be done as:
 
-   $$\nabla_x \log p_w(x|c;\sigma) = \nabla_x \log p_1(x|c;\sigma) + (w - 1) \nabla_x \log \frac{p_1(x|c;\sigma)}{p_0(x|c;\sigma)}$$
+   $$\nabla_x \log p_w(x|c;\sigma) = \nabla_x \log p_1(x|c;\sigma) + (w-1)\nabla_x \log \frac{p_1(x|c;\sigma)}{p_0(x|c;\sigma)}$$
 
    where $w$ is the guidance weight, $p_1$ is the conditional density from the main model, and $p_0$ is the guiding model's density. This formula modifies the sampling trajectory, pulling outputs to be closer to the desired high-probability regions.
 
