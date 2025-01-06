@@ -108,7 +108,6 @@ Autoguidance gives more diverse and realistic outputs. Consider the following ex
 - In the "Palace" class, CFG simplifies compositions into canonical templates, whereas autoguidance preserves rich, atypical details.  
 - In complex scenes, autoguidance focuses on enhancing individual elements without sacrificing overall diversity.
 
----
 
 ## Personal Insights and Future Directions
 
@@ -138,13 +137,11 @@ Autoguidance represents a paradigm shift in generative modeling. The method uses
 3. **Cross-Domain Applications:**  
    Extend autoguidance principles into text, video, and 3D generative models.
 
----
 
 ## Conclusion
 
 This work, "Guiding a Diffusion Model with a Bad Version of Itself," testifies to the ingenuity of researchers tackling core challenges in generative modeling. Autoguidance enables quality and variation control to be decoupled, making generative models more robust and varied. These approaches will undoubtedly form the foundation for future innovations in diffusion modeling.
 
----
 
 ## References
 
