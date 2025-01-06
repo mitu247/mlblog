@@ -15,10 +15,6 @@ But, as with all things, there are challenges. One of the biggest challenges in 
 
 Buckle up fellow dreamers, because I am going to take you through a paper that addresses this very challenge. The paper is titled **"Guiding a Diffusion Model with a Bad Version of Itself"** by NVIDIA. Let's dive in!
 
-<script type="text/javascript" async
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
-</script>
-
 ## The Problem
 
 Currently, the image generation community faces a dilemma: how to balance image **quality** and **variation**. At present, the most popular technique to guide image generation is **Classifier-Free Guidance (CFG)**. This technique uses an unconditional model to guide a conditional one, thereby enhancing prompt alignment and image quality but comes at the cost of reduced variation.Unfortunately, these entangled effects seriously limit the practical applicability of CFG, especially in applications requiring both variety and fidelity.
@@ -94,7 +90,7 @@ Each data sample $x$ is associated with a label $c$. At generation time, we cont
 
    $
    \begin{equation}
-   \theta = \arg \min_\theta \mathbb{E}{y \sim p{\text{data}}, \sigma \sim p_{\text{train}}, n \sim N(0, \sigma^2 I)} | D_\theta (y + n; \sigma) - y |_2^2,
+   \theta = \arg \min_\theta \mathbb{E}{y \sim p{\text{data}}, \sigma \sim p_{\text{train}}, n \sim N(0, \sigma^2 I)} | D_\theta (y + n; \sigma) - y |_2^2
    \end{equation}
    $
 
