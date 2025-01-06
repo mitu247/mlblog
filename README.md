@@ -31,7 +31,7 @@ So, they focused on developing a new technique called **Autoguidance** which adr
 2. **Variation:** How diverse are the generated results?  
 3. **Conditioning Alignment:** How well do the outputs adhere to user-specified prompts or labels?  
 
-Good News!:tada: The researchers at NVIDIA discovered that by guiding the generation model with a smaller and less-trained version of the model itself, high-quality image generation without sacrificing variation is possible (See _Figure 2_). This breakthrough offers disentangled control over image quality and variation, making it a game-changer in image generation.
+Good News! The researchers at NVIDIA discovered that by guiding the generation model with a smaller and less-trained version of the model itself, high-quality image generation without sacrificing variation is possible (See _Figure 2_). This breakthrough offers disentangled control over image quality and variation, making it a game-changer in image generation.
 
 ## Some Theoritical References
 
@@ -66,13 +66,17 @@ The equation describes a probability flow ODE that evolves a sample from high to
 The ODE is solved numerically by stepping along the trajectory defined by Eq. (1), requiring the evaluation of the score function $\nabla_x \log p(x; \sigma)$ for a given sample $x$ and noise level $\sigma$. This can be approximated using a neural network $D_\theta (x; \sigma)$ trained for denoising:
 
 $$
+\begin{equation}
 \theta = \arg \min_\theta \mathbb{E}_{y \sim p_{\text{data}}, \sigma \sim p_{\text{train}}, n \sim N(0, \sigma^2 I)} \| D_\theta (y + n; \sigma) - y \|_2^2,
+\end{equation}
 $$
 
 where $p_{\text{train}}$ controls the noise level distribution during training with score function is estimated as:
 
 $$
+\begin{equation}
 \nabla_x \log p(x; \sigma) \approx \frac{D_\theta (x; \sigma) - x}{\sigma^2}.
+\end{equation}
 $$
 
 Each data sample $x$ is associated with a label $c$. At generation time, we control the outcome by choosing $c$ and seeking a sample from $p(x|c; \sigma)$ with $\sigma = 0$, achieved by training $D_\theta (x; \sigma, c)$ with $c$ as an additional input.
@@ -85,7 +89,11 @@ Each data sample $x$ is associated with a label $c$. At generation time, we cont
 2. **Score-Based Guidance:**
    Modifying the score function during guidance, the guidance can be done as:
 
-   $$\nabla_x \log p_w(x|c;\sigma) = \nabla_x \log p_1(x|c;\sigma) + (w-1)\nabla_x \log \frac{p_1(x|c;\sigma)}{p_0(x|c;\sigma)}$$
+   $$
+   \begin{equation}
+   \nabla_x \log p_w(x|c;\sigma) = \nabla_x \log p_1(x|c;\sigma) + (w-1)\nabla_x \log \frac{p_1(x|c;\sigma)}{p_0(x|c;\sigma)}
+   \end{equation}
+   $$
 
    where $w$ is the guidance weight, $p_1$ is the conditional density from the main model, and $p_0$ is the guiding model's density. This formula modifies the sampling trajectory, pulling outputs to be closer to the desired high-probability regions.
 
