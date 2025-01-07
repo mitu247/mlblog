@@ -17,7 +17,7 @@ Buckle up fellow dreamers, because I am going to take you through a paper that a
 
 ## The Problem
 
-Currently, the image generation community faces a dilemma: how to balance image **quality** and **variation**. At present, the most popular technique to guide image generation is **Classifier-Free Guidance (CFG)**. This technique uses an unconditional model to guide a conditional one, thereby enhancing prompt alignment and image quality but comes at the cost of reduced variation.Unfortunately, these entangled effects seriously limit the practical applicability of CFG, especially in applications requiring both variety and fidelity.
+Currently, the image generation community faces a dilemma: how to balance image **quality** and **variation**. At present, the most popular technique to guide image generation is **Classifier-Free Guidance (CFG)**. This technique uses an unconditional model to guide a conditional one, thereby enhancing prompt alignment and image quality but comes at the cost of reduced variation.
 
 <p align="center">
   <img src="Improvement_Example.png" alt="Improved Image Generation Example" width="500" height="300">
@@ -30,9 +30,9 @@ So, they focused on developing a new technique called **Autoguidance** which adr
 2. **Variation:** How diverse are the generated results?  
 3. **Conditioning Alignment:** How well do the outputs adhere to user-specified prompts or labels?  
 
-Good News! The researchers at NVIDIA discovered that by guiding the generation model with a smaller and less-trained version of the model itself, high-quality image generation without sacrificing variation is possible (See _Figure 2_). This breakthrough offers disentangled control over image quality and variation, making it a game-changer in image generation.
+Good News! 🎉 The researchers at NVIDIA discovered that high-quality image generation without sacrificing variation is possible (See _Figure 2_). This breakthrough offers disentangled control over image quality and variation, making it a game-changer in image generation.
 
-## Some Theoritical References
+## Theories
 
 ### Diffusion Modeling
 
@@ -78,18 +78,26 @@ Each data sample $x$ is associated with a label $c$. At generation time, we cont
 
 ## Why Autoguidance Works ??
 
-1. **Error Amplification:**
-   The weaker guiding model $D_0$ makes the same mistakes as the main model $D_1$ but does so more **strongly**. This acts as a directional signal to correct the output of the main model. Something like a **"bad cop"** guiding a **"good cop"** to make better decisions.
+> **`Autoguidance:`** The paper suggested the isolation of image-quality improvement effect by training a high quality model (D1) with a poor model (D0) which is trained on the same data but with less capacity or training time. 
 
-2. **Score-Based Guidance:**
-   The score function is adjusted during guidance using a new parameter \( w \), known as the guidance weight. This adjustment influences the sampling process, ensuring that the outputs are more likely to be in the desired high-probability regions.
+### 🎯 **Why This Works**  
+Imagine two dart players:  
+- **Strong Player (D1) aka HQ-MODEL:** Skilled but struggles with tricky spots (low-probability regions).  
+- **Weaker Player (D0) aka LQ-MODEL:** Less skilled but highlights areas where D1 might also fail.  
 
-3. **Compatibility of Errors:**  
-   For example, the degradations of the guiding model, such as <u>reduced capacity</u> or <u>training time</u>, align with the limitations of the main model and amplify shared deficiencies in low-probability regions.
+When they both miss in the same areas, it shows where the Strong Player (model) needs improvement. The Weaker Player’s mistakes guide the Strong Player toward better aim by identifying and reducing errors.  
+
+### 💡 **Key Idea**  
+- **Flaws Match:** Both models make compatible mistakes (only the LQ-MODEL makes these mistakes in the same regions, only stronger), so their comparison is meaningful.  
+- **Controlled Gap:** The Weaker Player shouldn’t be too random; the skill gap must help focus on real issues.
+
+### **Moral of the Story**  
+Using this **mentor-student approach**, the weaker model (D0) amplifies flaws, helping the stronger one (D1) learn and improve accuracy—like refining your aim for the bullseye! 🎯
+
 
 ## Results and Impact
 
-The authors evaluate autoguidance on the ImageNet dataset, achieving state-of-the-art FID scores:
+The authors evaluate autoguidance on the **ImageNet** dataset, achieving state-of-the-art FID scores:
 
 - **1.25** for ImageNet-512 (512×512 resolution)  
 - **1.01** for ImageNet-64 (64×64 resolution)  
@@ -105,26 +113,30 @@ Autoguidance surpasses the current state-of-the-art in both CFG and interval-bas
 
 Autoguidance gives more diverse and realistic outputs. Consider the following examples:
 
-- In the "Palace" class, CFG simplifies compositions into canonical templates, whereas autoguidance preserves rich, atypical details.  
+- In the **Palace** class (see Fig. 2), CFG simplifies compositions into canonical templates, whereas autoguidance preserves rich, atypical details (<i>Guiding the results towards clearer realizations as the
+guidance weight increases</i>).  
 - In complex scenes, autoguidance focuses on enhancing individual elements without sacrificing overall diversity.
+
+### Limitations
+
+A separate model for guiding, but the additional price is meager. For instance, using the EDM2-S/XS pair increases training time by only 3.6%, making it a good bargain.
 
 
 ## Personal Insights and Future Directions
 
-### My Interpretation
+### 🤔 My Thoughts
 
-Autoguidance represents a paradigm shift in generative modeling. The method uses a "bad version" of the model itself in an elegant solution to a long-standing issue of balancing quality and diversity. Besides being practical, this approach has something unusually philosophically intriguing to it—leveraging imperfection as a means to refinement.
+Autoguidance marks a significant change in the world of generative modeling. This technique cleverly employs a "lesser version" of the model to address the ongoing challenge of achieving a balance between quality and diversity. Not only is this method effective, but it also presents a fascinating philosophical angle—**using flaws as a pathway to improvement.**
 
 ### Possible Applications
 
-1. **Unconditional Generation:**  
-   Autoguidance improves unconditional diffusion models, demonstrated by reducing FID from 11.67 to 3.86 in ImageNet experiments.
+1. **Image Generation:** Boosting the quality and variety of images produced for different uses, including artistic endeavors, marketing, and content creation.
 
-2. **Creative Industries:**  
-   Artists and designers might welcome more diversity and fidelity in generative tools.
+2. **Text-to-Image Synthesis:** Enhancing the correspondence between images and their textual descriptions, making it valuable for creative writing, storytelling, and visual content development.
 
-3. **Scientific Simulations:**  
-   Applications like climate modeling or material design that require both accuracy and diversity could benefit from autoguidance-inspired techniques.
+3. **Video Generation:** Applying autoguidance techniques to video creation, enabling the production of high-quality videos from random noise or lower-quality sources.
+
+4. **Societal Impact:** Generative modeling opens exciting creative possibilities, producing lifelike images and videos. Yet, its potential for misuse, like spreading disinformation or reinforcing biases, calls for thoughtful and responsible innovation.
 
 ### Future Research
 
@@ -140,10 +152,21 @@ Autoguidance represents a paradigm shift in generative modeling. The method uses
 
 ## Conclusion
 
-This work, "Guiding a Diffusion Model with a Bad Version of Itself," testifies to the ingenuity of researchers tackling core challenges in generative modeling. Autoguidance enables quality and variation control to be decoupled, making generative models more robust and varied. These approaches will undoubtedly form the foundation for future innovations in diffusion modeling.
+This work, "Guiding a Diffusion Model with a Bad Version of Itself," exemplifies the ingenuity of researchers working on the key problems of generative modeling. These methods will surely be the basis for new developments in diffusion modeling.
 
+## Some More Examples from the Paper
+
+<p align="center">
+   <img src="Ex-1.png" alt="AI Image Generation" width="500" height="300">
+   <br>
+   <img src="Ex-2.png" alt="AI Image Generation" width="500" height="300">
+   <br>
+   <img src="Ex-3.png" alt="AI Image Generation" width="500" height="300">
+</p>
 
 ## References
 
 1. **NVIDIA.** "Guiding a Diffusion Model with a Bad Version of Itself." NeurIPS 2024. [Paper Link](https://openreview.net/forum?id=bg6fVPVs3s)
 2. **AI Image Generation Picture** from [Medium](https://medium.com/@natiberk/the-state-of-ai-image-generation-03-24-e91f6d7ea6cf)
+3. **Example Images** from the paper by NVIDIA.
+3. **Detailed Implementation** of the paper on [GitHub](https://github.com/NVlabs/edm2.git)
